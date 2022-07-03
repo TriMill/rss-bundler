@@ -34,12 +34,12 @@ pub fn start(address: &str, thread_count: usize, state: Arc<Mutex<State>>) -> Ve
                 };
                 let page = url.path().split("/").last().unwrap_or("");
                 let res = match page {
-                    "/rss.xml" => {
+                    "rss.xml" => {
                         let guard = state.lock().unwrap();
                         let header = tiny_http::Header::from_bytes(&b"Content-Type"[..], &b"text/xml"[..]).unwrap();
                         Response::from_string(&guard.rss).with_header(header)
                     },
-                    "/status" => {
+                    "status" => {
                         let guard = state.lock().unwrap();
                         Response::from_string(guard.status.as_ref().unwrap_or(&"Status page disabled".into()))
                     },
