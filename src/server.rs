@@ -32,7 +32,8 @@ pub fn start(address: &str, thread_count: usize, state: Arc<Mutex<State>>) -> Ve
                         continue 
                     }
                 };
-                let res = match url.path() {
+                let page = url.path().split("/").last().unwrap_or("");
+                let res = match page {
                     "/rss.xml" => {
                         let guard = state.lock().unwrap();
                         let header = tiny_http::Header::from_bytes(&b"Content-Type"[..], &b"text/xml"[..]).unwrap();
