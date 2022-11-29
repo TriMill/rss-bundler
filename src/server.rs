@@ -32,7 +32,7 @@ pub fn start(address: &str, thread_count: usize, state: Arc<Mutex<State>>) -> Ve
                         continue 
                     }
                 };
-                let page = url.path().split("/").last().unwrap_or("");
+                let page = url.path().split('/').last().unwrap_or("");
                 let res = match page {
                     "rss.xml" => {
                         let guard = state.lock().unwrap();

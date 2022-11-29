@@ -40,7 +40,7 @@ fn main() -> ExitCode {
     let guids = load_guids().unwrap_or_default();
 
     let state = State {
-        rss: "".into(),
+        rss: String::new(),
         guids,
         feeds: HashMap::new(),
         status: None,
@@ -66,7 +66,7 @@ fn main() -> ExitCode {
             } else { None };
 
             if let Some(hook) = &config.hook {
-                run_hook(hook.to_owned(), hookdata).unwrap();
+                run_hook(hook, hookdata).unwrap();
             }
 
             guard.status = status;
@@ -92,7 +92,7 @@ fn load_config() -> Result<Config, Box<dyn std::error::Error>> {
 
 fn load_guids() -> Result<HashSet<String>, Box<dyn std::error::Error>> {
     let content = fs::read_to_string("guids")?;
-    Ok(content.split("\n").filter(|x| x.len() > 0).map(str::to_owned).collect())
+    Ok(content.split('\n').filter(|x| !x.is_empty()).map(str::to_owned).collect())
 }
 
 fn save_guids(guids: &HashSet<String>) -> Result<(), Box<dyn std::error::Error>> {

@@ -9,9 +9,9 @@ pub struct HookData {
     pub pub_date: String,
 }
 
-pub fn run_hook(hook: String, hookdata: Vec<HookData>) -> Result<(), std::io::Error> {
+pub fn run_hook(hook: &str, hookdata: Vec<HookData>) -> Result<(), std::io::Error> {
     for data in hookdata {
-        Command::new(hook.clone())
+        Command::new(hook)
             .env("TITLE", data.title)
             .env("TITLE_FMT", data.title_fmt)
             .env("AUTHOR", data.author)

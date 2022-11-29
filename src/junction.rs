@@ -50,7 +50,7 @@ pub fn bundle_rss(state: &mut State, config: &Config) -> (Vec<HookData>, Channel
                         state.guids.insert(guid.value.clone());
                             
                         let data = HookData {
-                            title: item.title.as_ref().unwrap_or(&config.default_title).to_owned(),
+                            title: item.title.as_ref().unwrap_or(&config.default_title).clone(),
                             title_fmt: item_title.clone(),
                             author: item.author.clone().unwrap(),
                             link: item.link.clone().unwrap_or_default(),
