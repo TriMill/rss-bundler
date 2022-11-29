@@ -4,17 +4,19 @@ use chrono::{DateTime, SubsecRound};
 use rss::Channel;
 use strfmt::strfmt;
 
-use crate::Feed;
+use crate::{Feed, State};
 use crate::config::{Config, User};
+use crate::hooks::HookData;
 
-pub fn bundle_rss(feeds: &HashMap<User, Feed>, config: &Config) -> Channel {
+pub fn bundle_rss(state: &mut State, config: &Config) -> (Vec<HookData>, Channel) {
     let mut bundle = Channel::default();
     bundle.set_title(&config.title);
     bundle.set_link(&config.link);
     bundle.description = config.description.clone();
     bundle.set_generator(Some("RSS Bundler".into()));
+    let mut hookdata = Vec::new();
     let mut most_recent_date = None;
-    for (user, feed) in feeds {
+    for (user, feed) in &state.feeds {
         if let Some(channel) = &feed.channel {
             for item in channel.items() {
                 if let Some(pub_date) = &item.pub_date {
@@ -27,6 +29,9 @@ pub fn bundle_rss(feeds: &HashMap<User, Feed>, config: &Config) -> Channel {
                     }
                 }
                 let mut item = item.clone();
+                if item.author.is_none() {
+                    item.set_author(user.name.clone());
+                }
                 let item_title = {
                     let title = item.title.as_ref().unwrap_or(&config.default_title);
                     let mut args = HashMap::new();
@@ -40,10 +45,23 @@ pub fn bundle_rss(feeds: &HashMap<User, Feed>, config: &Config) -> Channel {
                         }
                     }
                 };
-                item.set_title(item_title);
-                if item.author.is_none() {
-                    item.set_author(user.name.clone());
+                if let Some(guid) = &item.guid {
+                    if !state.guids.contains(&guid.value) {
+                        state.guids.insert(guid.value.clone());
+                            
+                        let data = HookData {
+                            title: item.title.as_ref().unwrap_or(&config.default_title).to_owned(),
+                            title_fmt: item_title.clone(),
+                            author: item.author.clone().unwrap(),
+                            link: item.link.clone().unwrap_or_default(),
+                            guid: item.guid.clone().map(|g| g.value).unwrap_or_default(),
+                            pub_date: item.pub_date.clone().unwrap_or_default(),
+                        };
+
+                        hookdata.push(data);
+                    }
                 }
+                item.set_title(item_title);
                 bundle.items.push(item.clone());
             }
         }
@@ -51,7 +69,7 @@ pub fn bundle_rss(feeds: &HashMap<User, Feed>, config: &Config) -> Channel {
     if let Some(date) = most_recent_date {
         bundle.set_pub_date(date.to_rfc2822());
     }
-    bundle
+    (hookdata, bundle)
 }
 
 pub fn gen_status(feeds: &HashMap<User, Feed>) -> String {

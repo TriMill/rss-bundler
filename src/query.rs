@@ -10,17 +10,16 @@ use crate::config::{User, Config};
 pub fn update_feeds(feeds: &mut HashMap<User, Feed>, config: &Config) {
     let client = Client::new();
     for user in &config.users {
-        let feed = match feeds.get_mut(user) {
-            Some(feed) => feed,
-            None => {
-                let feed = Feed {
-                    channel: None,
-                    error_message: None,
-                    last_fetched: Utc.ymd(1970, 1, 1).and_hms(0, 0, 0)
-                };
-                feeds.insert(user.clone(), feed);
-                feeds.get_mut(user).unwrap()
-            }
+        let feed = if let Some(feed) = feeds.get_mut(user) {
+            feed
+        } else {
+            let feed = Feed {
+                channel: None,
+                error_message: None,
+                last_fetched: Utc.ymd(1970, 1, 1).and_hms(0, 0, 0)
+            };
+            feeds.insert(user.clone(), feed);
+            feeds.get_mut(user).unwrap()
         };
         let res = client.get(&user.rss)
             .timeout(Duration::from_secs(5))

@@ -30,6 +30,9 @@ pub struct Config {
     #[serde(default="default_host")]
     pub host: String,
 
+    #[serde(default)]
+    pub hook: Option<String>,
+
     pub users: Vec<User>,
 }
 

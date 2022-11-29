@@ -28,6 +28,7 @@ The following fields are optional:
 | `worker_threads` | Number of threads to spawn for the web server.                                                 | `4`                |
 | `port`           | Port number for web server                                                                     | `4400`             |
 | `host`           | Host for web server                                                                            | `127.0.0.1`        |
+| `hook`           | Path to hook to run upon recieving new blog posts                                              | `./hook.sh`        |
 
 Here is an example configuration:
 
@@ -45,6 +46,16 @@ Here is an example configuration:
     ]
 }
 ```
+
+## Hook
+
+Every time a new post is loaded, the hook program (if specified) will be executed. This is based on GUIDs, so feeds that do not fill the `guid` field will not trigger hooks. The following environment variables will be set:
+- `TITLE` - the original title of the post
+- `TITLE_FMT` - the formatted title of the post 
+- `AUTHOR` - the post's author
+- `LINK` - the link to the post
+- `GUID` - the post's GUID
+- `PUB_DATE` - the post's publishing date
 
 ## Status page
 
